@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="AuthenticationStateSyncer\**" />
+    <Content Remove="AuthenticationStateSyncer\**" />
+    <EmbeddedResource Remove="AuthenticationStateSyncer\**" />
+    <None Remove="AuthenticationStateSyncer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BlazorApp1.Client\BlazorApp1.Client.csproj" />
     <ProjectReference Include="..\BlazorApp1.ServiceDefaults\BlazorApp1.ServiceDefaults.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />

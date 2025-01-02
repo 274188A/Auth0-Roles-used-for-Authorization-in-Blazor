@@ -3,12 +3,11 @@ using BlazorApp1.Client.Pages;
 using BlazorApp1.Components;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
+
 
 builder.Services
     .AddAuth0WebAppAuthentication(options => {
@@ -19,6 +18,8 @@ builder.Services
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents()
+    .AddAuthenticationStateSerialization()
     .AddInteractiveWebAssemblyComponents();
 
 var app = builder.Build();
