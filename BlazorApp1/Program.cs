@@ -89,12 +89,20 @@ app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = 
 
 app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
 {
-    var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
-            .WithRedirectUri("/")
-            .Build();
+    string? domain = builder.Configuration["Auth0:Domain"];
+    string? clientId = builder.Configuration["Auth0:ClientId"];
 
-    await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+    // Dynamically build the returnTo URL using the current request
+    var request = httpContext.Request;
+    string returnTo = $"{request.Scheme}://{request.Host}/";
+
+    string logoutUrl = $"https://{domain}/v2/logout?client_id={clientId}&returnTo={Uri.EscapeDataString(returnTo)}";
+
+    // Sign out of the local cookie authentication
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+    // Redirect to Auth0 logout endpoint
+    httpContext.Response.Redirect(logoutUrl);
 });
 
 app.MapStaticAssets();
