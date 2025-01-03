@@ -4,5 +4,8 @@ Very simple Blazor app with Aspire and Auth0 for Identity.  Roles are defined in
 https://auth0.com/docs/customize/actions/explore-triggers
 
 The C# code has to translates those auth0 roles claims into standard roles.
-![image](https://github.com/user-attachments/assets/3b4fbea5-ad15-4775-abba-667f3e901b6a)
+![image](https://github.com/user-attachments/assets/455727c8-a346-428c-887e-f5ef89f55947)
+
+Currently thee is no easy way I know of to also populate the identity with Auth0 Permissions.
+
 
