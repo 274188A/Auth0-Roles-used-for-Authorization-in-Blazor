@@ -6,6 +6,6 @@ https://auth0.com/docs/customize/actions/explore-triggers
 The C# code has to translates those auth0 roles claims into standard roles.
 ![image](https://github.com/user-attachments/assets/455727c8-a346-428c-887e-f5ef89f55947)
 
-Currently thee is no easy way I know of to also populate the identity with Auth0 Permissions.
+Currently looking for a way to also populate the identity with Auth0 Permissions.  Might involve a custon claim...
 
 
