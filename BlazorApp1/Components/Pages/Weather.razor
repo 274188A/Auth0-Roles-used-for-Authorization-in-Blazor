@@ -1,6 +1,7 @@
 ﻿@page "/weather"
-@attribute [Authorize]
+@attribute [Authorize(Roles ="TestRole")]
 @attribute [StreamRendering]
+@inject TokenService TokenService
 
 <PageTitle>Weather</PageTitle>
 
@@ -8,7 +9,20 @@
 
 <p>Hello @Username!</p>
 <p>This component demonstrates showing data.</p>
-
+<h3>ID Token Claims</h3>
+<ul>
+    @if (tokenClaims != null)
+    {
+        foreach (var claim in tokenClaims)
+        {
+            <li>@claim.Type: @claim.Value</li>
+        }
+    }
+    else
+    {
+        <li>No token found or claims are empty.</li>
+    }
+</ul>
 @if (forecasts == null)
 {
     <p><em>Loading...</em></p>
@@ -44,6 +58,7 @@ else
     private Task<AuthenticationState>? authenticationState { get; set; }
 
     private string Username = "";
+    private IEnumerable<System.Security.Claims.Claim>? tokenClaims;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,6 +79,10 @@ else
             var state = await authenticationState;
 
             Username = state?.User?.Identity?.Name ?? string.Empty;
+
+            tokenClaims = await TokenService.GetTokenClaimsAsync();
+            StateHasChanged();
+
         }
     }
 
