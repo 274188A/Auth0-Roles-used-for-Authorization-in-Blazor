@@ -12,12 +12,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCascadingAuthenticationState();
 
 string? audience = builder.Configuration["Auth0:Audience"];
+string? domain = builder.Configuration["Auth0:Domain"];
+string? clientId = builder.Configuration["Auth0:ClientId"];
 
 builder.Services
     .AddAuth0WebAppAuthentication(options =>
     {
-        options.Domain = builder.Configuration["Auth0:Domain"]!;
-        options.ClientId = builder.Configuration["Auth0:ClientId"]!;
+        options.Domain = domain!;
+        options.ClientId = clientId!;
         options.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
         options.Scope = "openid profile email";
     })
@@ -89,9 +91,6 @@ app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = 
 
 app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
 {
-    string? domain = builder.Configuration["Auth0:Domain"];
-    string? clientId = builder.Configuration["Auth0:ClientId"];
-
     // Dynamically build the returnTo URL using the current request
     var request = httpContext.Request;
     string returnTo = $"{request.Scheme}://{request.Host}/";
