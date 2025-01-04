@@ -9,8 +9,16 @@ This is a **very simple Blazor app** that integrates **Aspire** and **Auth0** fo
 
 ### Example of Role Claim Mapping
 
-Here is a visualization of the process:
-
+Trigger:
+'''
+exports.onExecutePostLogin = async (event, api) => {
+  const roleClaim = 'https://blazorserverapp.local';
+  
+  if (event.authorization) {
+    api.idToken.setCustomClaim(`${roleClaim}/roles`, event.authorization.roles);    
+  }
+};
+'''
 ![Role Claim Mapping](https://github.com/user-attachments/assets/5f7a6388-aad1-4c49-bd46-3519234bee60)
 
 > For more information on post-login triggers, see the [Auth0 Documentation](https://auth0.com/docs/customize/actions/explore-triggers).
