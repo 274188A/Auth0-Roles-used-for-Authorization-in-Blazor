@@ -7,10 +7,8 @@ This is a **very simple Blazor app** that integrates **Aspire** and **Auth0** fo
 - **Roles Defined in Auth0**: Roles are set up in Auth0 and injected into the identity token via a post-login trigger.
 - **Mapping Auth0 Roles**: The C# code translates Auth0 role claims into standard roles for use within the application.
 
-### Example of Role Claim Mapping
+### Example of Role Claim Mapping Using Trigger Post-Login
 
-Trigger:
-'''
 exports.onExecutePostLogin = async (event, api) => {
   const roleClaim = 'https://blazorserverapp.local';
   
@@ -18,7 +16,7 @@ exports.onExecutePostLogin = async (event, api) => {
     api.idToken.setCustomClaim(`${roleClaim}/roles`, event.authorization.roles);    
   }
 };
-'''
+
 ![Role Claim Mapping](https://github.com/user-attachments/assets/5f7a6388-aad1-4c49-bd46-3519234bee60)
 
 > For more information on post-login triggers, see the [Auth0 Documentation](https://auth0.com/docs/customize/actions/explore-triggers).
