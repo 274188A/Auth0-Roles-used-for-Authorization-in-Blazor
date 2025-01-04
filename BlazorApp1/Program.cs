@@ -30,7 +30,7 @@ builder.Services.Configure<OpenIdConnectOptions>(Auth0Constants.AuthenticationSc
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        RoleClaimType = "https://blazorserverapp.local/roles" // Map custom role claim
+        RoleClaimType = $"{audience}/roles" // Map custom role claim
     };
 
     options.Events = new OpenIdConnectEvents
