@@ -12,12 +12,8 @@ This is a **very simple Blazor app** that integrates **Aspire** and **Auth0** fo
 ```javascript
 exports.onExecutePostLogin = async (event, api) => {
   const roleClaim = 'https://blazorserverapp.local';
-
   if (event.authorization) {
-    api.idToken.setCustomClaim(
-      `${roleClaim}/roles`, 
-      event.authorization.roles
-    );
+    api.idToken.setCustomClaim(${roleClaim}/roles, event.authorization.roles);
   }
 };
 ```
