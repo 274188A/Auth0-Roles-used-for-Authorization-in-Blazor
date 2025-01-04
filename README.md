@@ -24,7 +24,35 @@ exports.onExecutePostLogin = async (event, api) => {
 
 ### Code To Map Auth0 Roles to Standard Roles
 
-The application contains C# logic to process the Auth0 roles. Below is an illustration:
+The application contains C# logic to map the Auth0 roles:
 
-![C# Code Example](https://github.com/user-attachments/assets/455727c8-a346-428c-887e-f5ef89f55947)
+```csharp
+// Add claim mapping logic to include custom roles
+builder.Services.Configure<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme, options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        RoleClaimType = $"{audience}/roles" // Map custom role claim
+    };
+
+    options.Events = new OpenIdConnectEvents
+    {
+        OnTokenValidated = context =>
+        {
+            if (context.Principal?.Identity is ClaimsIdentity identity)
+            {
+                // Map custom roles to standard role claims
+                var roleClaims = identity.FindAll($"{audience}/roles").ToList();
+                foreach (var roleClaim in roleClaims)
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+    };
+});
+```
+
 
