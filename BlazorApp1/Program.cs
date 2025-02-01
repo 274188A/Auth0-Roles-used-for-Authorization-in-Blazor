@@ -1,56 +1,15 @@
-using System.Security.Claims;
 using Auth0.AspNetCore.Authentication;
+using BlazorApp1;
+using BlazorApp1.Client;
 using BlazorApp1.Client.Pages;
+using BlazorApp1.Client.Services;
 using BlazorApp1.Components;
+using BlazorApp1.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddCascadingAuthenticationState();
-
-string? audience = builder.Configuration["Auth0:Audience"];
-string? domain = builder.Configuration["Auth0:Domain"];
-string? clientId = builder.Configuration["Auth0:ClientId"];
-
-builder.Services
-    .AddAuth0WebAppAuthentication(options =>
-    {
-        options.Domain = domain!;
-        options.ClientId = clientId!;
-        options.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
-        options.Scope = "openid profile email";
-    })
-    .WithAccessToken(options => options.Audience = audience);
-
-// Add claim mapping logic to include custom roles
-builder.Services.Configure<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme, options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        RoleClaimType = $"{audience}/roles" // Map custom role claim
-    };
-
-    options.Events = new OpenIdConnectEvents
-    {
-        OnTokenValidated = context =>
-        {
-            if (context.Principal?.Identity is ClaimsIdentity identity)
-            {
-                // Map custom roles to standard role claims
-                var roleClaims = identity.FindAll($"{audience}/roles").ToList();
-                foreach (var roleClaim in roleClaims)
-                {
-                    identity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
-                }
-            }
-
-            return Task.CompletedTask;
-        }
-    };
-});
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -58,7 +17,36 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<TokenService>();
+
+string? audience = builder.Configuration["Auth0:Audience"];
+
+builder.Services.AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = builder.Configuration["Auth0:Domain"]!;
+        options.ClientId = builder.Configuration["Auth0:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
+        options.Scope = "openid profile email";
+    })
+    .WithAccessToken(options => options.Audience = audience);
+
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
+builder.Services.AddScoped<HostingEnvironmentService>();
+builder.Services.AddSingleton<BaseUrlProvider>();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services
+    .AddTransient<CookieHandler>()
+    .AddScoped(sp => sp
+        .GetRequiredService<IHttpClientFactory>()
+        .CreateClient("API"))
+    .AddHttpClient("API", (provider, client) =>
+    {
+        // Get base address
+        string? uri = provider.GetRequiredService<BaseUrlProvider>().BaseUrl;
+        client.BaseAddress = new Uri(uri!);
+    }).AddHttpMessageHandler<CookieHandler>();
 
 var app = builder.Build();
 
@@ -76,36 +64,18 @@ else
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = "/") =>
-{
-    var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-            .WithRedirectUri(returnUrl)
-            .Build();
-
-    await httpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-});
-
-app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
-{
-    // Dynamically build the returnTo URL using the current request
-    var request = httpContext.Request;
-    string returnTo = $"{request.Scheme}://{request.Host}/";
-
-    string logoutUrl = $"https://{domain}/v2/logout?client_id={clientId}&returnTo={Uri.EscapeDataString(returnTo)}";
-
-    // Sign out of the local cookie authentication
-    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-    // Redirect to Auth0 logout endpoint
-    httpContext.Response.Redirect(logoutUrl);
-});
+app.SetupEndpoints(builder.Configuration);
 
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()    
+    .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Counter).Assembly);
 
