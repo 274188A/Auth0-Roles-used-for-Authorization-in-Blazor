@@ -54,9 +54,8 @@ builder.Services.Configure<OpenIdConnectOptions>(Auth0Constants.AuthenticationSc
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization()
+    .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddScoped<TokenService>();

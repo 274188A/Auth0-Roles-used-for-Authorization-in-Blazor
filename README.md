@@ -1,6 +1,8 @@
 # Blazor App with Aspire and Auth0 Integration
 
-This is a **very simple Blazor app** that integrates **Aspire** and **Auth0** for identity management. The app uses Auth0 to define roles, which are added to the identity token using a **post-login event trigger**.
+This is a **very simple Blazor app** that integrates **Aspire** and **Auth0** for identity management. 
+The app uses Auth0 to define roles, which are added to the identity token using a **post-login event trigger**.
+The Auth0 Template used for this was the 
 
 ## Key Features
 
