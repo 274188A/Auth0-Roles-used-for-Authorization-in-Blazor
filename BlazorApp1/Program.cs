@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Auth0.AspNetCore.Authentication;
 using BlazorApp1;
 using BlazorApp1.Client;
@@ -7,7 +8,9 @@ using BlazorApp1.Components;
 using BlazorApp1.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,13 +34,13 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     })
     .WithAccessToken(options => options.Audience = audience);
 
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
+
+builder.Services.AddTransient<IClaimsTransformation, CustomClaimsTransformation>(); // claim mapping logic to include Auth0 roles
 builder.Services.AddScoped<HostingEnvironmentService>();
 builder.Services.AddSingleton<BaseUrlProvider>();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services
-    .AddTransient<CookieHandler>()
+builder.Services.AddTransient<CookieHandler>()
     .AddScoped(sp => sp
         .GetRequiredService<IHttpClientFactory>()
         .CreateClient("API"))
