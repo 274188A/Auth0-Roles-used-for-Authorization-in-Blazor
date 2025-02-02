@@ -34,7 +34,6 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     })
     .WithAccessToken(options => options.Audience = audience);
 
-
 builder.Services.AddTransient<IClaimsTransformation, CustomClaimsTransformation>(); // claim mapping logic to include Auth0 roles
 builder.Services.AddScoped<HostingEnvironmentService>();
 builder.Services.AddSingleton<BaseUrlProvider>();
